@@ -265,10 +265,12 @@ public class AiChatServiceImpl implements IAiChatService
         StringBuilder prompt = new StringBuilder();
         prompt.append("你是「物小助」智能库管助手，服务中小规模单位的补货、采购、库存与应付管理。\n");
         prompt.append("回答规则：\n");
-        prompt.append("1. 事实优先取自【知识库资料】与【相关商品实时数据】，引用时在句末标注（来源：文档标题）。\n");
-        prompt.append("2. 数量、金额、单据状态以【实时业务快照】和【相关商品实时数据】为准；都没有的数据不要编造，直接说明系统里查不到。\n");
-        prompt.append("3. 用简体中文，先给结论再列要点，最多 6 行；不要使用 Markdown 表格、标题符号和代码块。\n");
-        prompt.append("4. 给操作建议时写成可执行步骤，不要声称系统会自动执行。\n\n");
+        prompt.append("1. 规格、型号、材质、参考单价等静态信息取自【知识库资料】，引用时在句末标注（来源：文档标题）。\n");
+        prompt.append("2. 当前库存数量、可用量、安全库存、在途量、金额、单据状态一律以【实时业务快照】和【相关商品实时数据】为准；知识库表格里出现的数量是导入时的历史值，不能当作当前库存。\n");
+        prompt.append("3. 可用 = 现存 − 锁定；快照中的「可用」是系统已算好的准确值，禁止根据安全库存或知识库数字自行推算、补零或改写。\n");
+        prompt.append("4. 快照没有给出的数据不要编造，直接说明系统里查不到。\n");
+        prompt.append("5. 用简体中文，先给结论再列要点，最多 6 行；不要使用 Markdown 表格、标题符号和代码块。\n");
+        prompt.append("6. 给操作建议时写成可执行步骤，不要声称系统会自动执行。\n\n");
         prompt.append("【实时业务快照】\n").append(snapshot(enterpriseId)).append('\n');
         if (productBlock != null && !productBlock.isEmpty())
         {
@@ -348,7 +350,8 @@ public class AiChatServiceImpl implements IAiChatService
                 text.append("｜规格 ").append(product.getSpec());
             }
             text.append("｜单价 ¥").append(product.getRefPrice() == null ? "-" : product.getRefPrice().toPlainString());
-            text.append("｜现存 ").append(product.getStockQty() == null ? "0" : product.getStockQty().stripTrailingZeros().toPlainString());
+            BigDecimal available = product.getAvailableQty() == null ? product.getStockQty() : product.getAvailableQty();
+            text.append("｜可用 ").append(available == null ? "0" : available.stripTrailingZeros().toPlainString());
             text.append(product.getUnit() == null ? "" : product.getUnit());
             text.append('\n');
         }
@@ -375,8 +378,8 @@ public class AiChatServiceImpl implements IAiChatService
             List<Stock> stocks = stockMapper.selectStockList(enterpriseId, null, null, Boolean.TRUE);
             if (stocks != null && !stocks.isEmpty())
             {
-                text.append("低库存明细：");
-                int limit = Math.min(5, stocks.size());
+                text.append("低库存明细（共 ").append(stocks.size()).append(" 个，可用 = 现存 − 锁定）：");
+                int limit = Math.min(10, stocks.size());
                 for (int i = 0; i < limit; i++)
                 {
                     Stock stock = stocks.get(i);
@@ -384,8 +387,14 @@ public class AiChatServiceImpl implements IAiChatService
                     {
                         text.append("、");
                     }
-                    text.append(stock.getProductName()).append("(可用 ").append(plain(stock.getAvailableQty()))
+                    BigDecimal qty = stock.getQty() == null ? BigDecimal.ZERO : stock.getQty();
+                    BigDecimal locked = stock.getLockedQty() == null ? BigDecimal.ZERO : stock.getLockedQty();
+                    text.append(stock.getProductName()).append("(可用 ").append(plain(qty.subtract(locked)))
                             .append("/安全 ").append(plain(stock.getSafetyStock())).append(")");
+                }
+                if (stocks.size() > limit)
+                {
+                    text.append("……");
                 }
                 text.append("。");
             }

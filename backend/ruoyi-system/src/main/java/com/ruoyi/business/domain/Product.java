@@ -38,6 +38,9 @@ public class Product extends BizBase
     /** 现存量，列表展示用 */
     private BigDecimal stockQty;
 
+    /** 可用量 = 现存 − 锁定，AI 实时数据用 */
+    private BigDecimal availableQty;
+
     public Long getProductId()
     {
         return productId;
@@ -166,5 +169,15 @@ public class Product extends BizBase
     public void setStockQty(BigDecimal stockQty)
     {
         this.stockQty = stockQty;
+    }
+
+    public BigDecimal getAvailableQty()
+    {
+        return availableQty;
+    }
+
+    public void setAvailableQty(BigDecimal availableQty)
+    {
+        this.availableQty = availableQty;
     }
 }
