@@ -44,9 +44,7 @@
 
     <view class="form-actions">
       <view class="ios-btn ios-btn-primary" hover-class="ios-btn-hover" @click="save">保存参数</view>
-    </view>
-    <view class="ios-section-footer">计算口径：G = max(安全库存, 日耗 ×（周期 + 交期）× 季节系数)，再减去可用库存与在途量，并受最大库存封顶。</view>
-    <view class="ios-safe-bottom"></view>
+    </view>    <view class="ios-safe-bottom"></view>
   </view>
 </template>
 

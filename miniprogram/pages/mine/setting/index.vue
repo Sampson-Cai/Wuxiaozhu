@@ -26,8 +26,6 @@
         <view class="ios-cell-main"><view class="ios-cell-title">恢复默认</view></view>
       </view>
     </view>
-    <view class="ios-section-footer">真机调试时手机访问不到 127.0.0.1，需要填电脑的局域网 IP，且手机与电脑连同一个 Wi-Fi。</view>
-
     <view class="ios-section-title">账号</view>
     <view class="ios-group">
       <view class="ios-cell" hover-class="ios-cell-hover" @click="go('/pages/mine/pwd/index')">

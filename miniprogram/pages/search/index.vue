@@ -9,10 +9,6 @@
       </view>
     </view>
 
-    <view class="tips" v-if="!searched">
-      试试「找到一台电脑的配套螺丝」「打印纸」「M2 螺丝」。
-    </view>
-
     <view v-if="searched" class="ios-section-title">匹配结果（{{ rows.length }}）</view>
     <view class="ios-group" v-if="searched">
       <view v-if="rows.length === 0 && !loading" class="ios-empty">没有匹配的商品，换个说法试试</view>

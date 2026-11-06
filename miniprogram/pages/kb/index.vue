@@ -45,9 +45,6 @@
       </view>
     </view>
 
-    <view class="ios-section-footer">
-      导入新文档：把文件放到服务器后调用「知识库导入」接口即可自动切片与向量化；点文档可重建向量或删除。
-    </view>
     <view class="ios-loading" v-if="loading">加载中…</view>
     <view class="ios-safe-bottom"></view>
   </view>

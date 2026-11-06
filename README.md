@@ -2,6 +2,8 @@
 
 面向中小规模单位的补货、采购、库存与应付管理系统。后端基于 RuoYi 4.8.3（Spring Boot 4.1 / JDK 17）改造为 JSON API，前端为 uni-app 微信小程序，内置基于知识库的 AI 助手（RAG + SSE 流式）。
 
+> 定稿版本 v1.0.0 · 2026-11-06 · 后端已部署至 `https://demo7.ztcoding.com`
+
 ## 目录结构
 
 ```
@@ -74,16 +76,29 @@ npm run build:mp-weixin
 
 ## 部署
 
-服务器部署与运维见 `backend/doc/部署运行说明.md`，常用命令：
+生产环境：`152.136.137.81`，域名 `https://demo7.ztcoding.com`。详细步骤见 `backend/doc/部署运行说明.md`。
+
+| 组件 | 说明 |
+| --- | --- |
+| 进程管理 | systemd 单元 `qixiaozhu.service`，开机自启、异常 5s 重启 |
+| Web 服务 | 宝塔 nginx 1.24，站点配置 `/www/server/panel/vhost/nginx/demo7.ztcoding.com.conf` |
+| 后端监听 | `127.0.0.1:18080`，仅本机，公网只能经 nginx 443 进入 |
+| 证书 | Let's Encrypt，webroot 续期，续期后自动 reload nginx |
+| 环境变量 | `/opt/qixiaozhu/app.env`（600，含库口令与模型密钥，不入库） |
 
 ```bash
-/opt/qixiaozhu/start.sh            # 启动
-/opt/qixiaozhu/start.sh restart    # 重启
-/opt/qixiaozhu/stop.sh             # 停止
+sudo systemctl status qixiaozhu      # 查看状态
+sudo systemctl restart qixiaozhu     # 重启后端
+sudo systemctl restart nginx         # 重启 nginx
 tail -f /opt/qixiaozhu/logs/stdout.log
 ```
 
-环境变量放在 `/opt/qixiaozhu/app.env`（权限 600，不入库）。
+### 安全基线
+
+- 登录验证码开启（`shiro.user.captchaEnabled: true`），验证码按 `uuid` 缓存 2 分钟、一次性失效
+- 公网只放行 `22`、`80`、`443`、`16988`（面板），MySQL、18080、888、8888、FTP 端口均已关闭
+- 数据库仅监听本机，账号 `wxz@localhost`
+
 
 ## 默认账号
 

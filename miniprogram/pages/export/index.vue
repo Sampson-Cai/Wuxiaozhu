@@ -46,8 +46,6 @@
         </view>
       </view>
     </view>
-
-    <view class="ios-section-footer">导出文件为 .xlsx，下载后可直接用系统应用打开或转发。</view>
     <view class="ios-safe-bottom"></view>
   </view>
 </template>

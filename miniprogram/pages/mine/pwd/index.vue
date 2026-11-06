@@ -22,8 +22,6 @@
     <view class="pwd-actions">
       <view class="ios-btn ios-btn-primary" hover-class="ios-btn-hover" @click="submit">确认修改</view>
     </view>
-
-    <view class="ios-section-footer">修改成功后当前登录仍然有效，下次登录请使用新密码。</view>
   </view>
 </template>
 

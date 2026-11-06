@@ -35,9 +35,7 @@
 
     <view class="form-actions">
       <view class="ios-btn ios-btn-primary" hover-class="ios-btn-hover" @click="save">保存</view>
-    </view>
-    <view class="ios-section-footer">账期用于收货后自动生成应付账款的到期日。</view>
-    <view class="ios-safe-bottom"></view>
+    </view>    <view class="ios-safe-bottom"></view>
   </view>
 </template>
 

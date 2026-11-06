@@ -38,19 +38,6 @@ module.exports = {
     // 应用版本
     version: '1.0.0',
     // 应用logo
-    logo: '/static/images/logo.png',
-    // 官方网站
-    site_url: '',
-    // 政策协议
-    agreements: [
-      {
-        title: '隐私政策',
-        url: 'https://ruoyi.vip/protocol.html'
-      },
-      {
-        title: '用户服务协议',
-        url: 'https://ruoyi.vip/protocol.html'
-      }
-    ]
+    logo: '/static/images/logo.png'
   }
 }

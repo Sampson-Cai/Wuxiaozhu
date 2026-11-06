@@ -2,7 +2,6 @@
   <view class="ios-page">
     <view :style="{ height: topOffset + 'px' }"></view>
     <view class="ios-large-title">工作台</view>
-    <view class="ios-large-title-sub">按业务分组，未接入的模块仍展示入口</view>
 
     <view v-for="group in groups" :key="group.title">
       <view class="ios-section-title">{{ group.title }}</view>
@@ -18,7 +17,6 @@
       </view>
     </view>
 
-    <view class="ios-section-footer">共 {{ totalCount }} 个入口，已接入 {{ readyCount }} 个</view>
     <view class="ios-safe-bottom"></view>
   </view>
 </template>

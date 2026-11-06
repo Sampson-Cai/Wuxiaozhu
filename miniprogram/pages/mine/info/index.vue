@@ -46,8 +46,6 @@
         <view class="ios-cell-main"><view class="ios-cell-title">{{ name }}</view></view>
       </view>
     </view>
-
-    <view class="ios-section-footer">资料由单位管理员维护，如需修改请联系管理员。</view>
     <view class="ios-safe-bottom"></view>
   </view>
 </template>

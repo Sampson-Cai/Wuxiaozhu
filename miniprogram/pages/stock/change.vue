@@ -32,9 +32,7 @@
 
     <view class="form-actions">
       <view class="ios-btn ios-btn-primary" hover-class="ios-btn-hover" @click="submit">确认{{ isIn ? '入库' : '出库' }}</view>
-    </view>
-    <view class="ios-section-footer">{{ isIn ? '入库会增加现有库存并生成入库流水。' : '出库会校验可用库存，不足时会被拒绝。' }}</view>
-  </view>
+    </view>  </view>
 </template>
 
 <script>
