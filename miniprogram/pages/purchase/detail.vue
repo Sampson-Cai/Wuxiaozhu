@@ -1,6 +1,5 @@
 <template>
   <view class="ios-page detail" v-if="order">
-    <!-- 单头 -->
     <view class="ios-card ios-card-pad head">
       <view class="ios-between">
         <view class="head-no">{{ order.orderNo }}</view>
@@ -9,9 +8,16 @@
       <view class="head-amount">¥{{ money(order.totalAmount) }}</view>
       <view class="head-meta">{{ order.supplierName || '未指定供应商' }} · {{ order.createTime }}</view>
       <view v-if="order.remark" class="head-remark">备注：{{ order.remark }}</view>
+      <view v-if="operationMessage" class="operation-result">
+        <uni-icons type="checkmarkempty" size="18" color="#007AFF"></uni-icons>
+        <text>{{ operationMessage }}</text>
+      </view>
+      <view v-if="refreshFailed" class="refresh-state">
+        <text>详情刷新失败</text>
+        <button class="refresh-btn" :disabled="loading || !!busyAction" @click="load">重新刷新</button>
+      </view>
     </view>
 
-    <!-- 明细 -->
     <view class="ios-section-title">采购明细</view>
     <view class="ios-group">
       <view v-for="item in order.items" :key="item.itemId" class="ios-cell">
@@ -23,7 +29,6 @@
       </view>
     </view>
 
-    <!-- 审批记录 -->
     <view v-if="order.approvals && order.approvals.length" class="ios-section-title">审批记录</view>
     <view v-if="order.approvals && order.approvals.length" class="ios-group">
       <view v-for="row in order.approvals" :key="row.approvalId" class="ios-cell">
@@ -39,21 +44,20 @@
       </view>
     </view>
 
-    <!-- 操作栏 -->
     <view class="action-bar" v-if="actions.length || canPrint">
-      <view v-if="canPrint" class="ios-btn ios-btn-secondary action-btn" hover-class="ios-btn-hover" @click="printPdf">
-        打印
-      </view>
-      <view v-for="action in actions" :key="action.key" class="ios-btn action-btn" :class="action.class"
-        hover-class="ios-btn-hover" @click="action.handler">{{ action.label }}</view>
+      <button v-if="canPrint" class="ios-btn ios-btn-secondary action-btn"
+        :disabled="!!busyAction || confirming || loading" hover-class="ios-btn-hover" @click="printPdf">打印</button>
+      <button v-for="action in actions" :key="action.key" class="ios-btn action-btn" :class="action.class"
+        :disabled="!!busyAction || confirming || loading || refreshFailed" :loading="busyAction === action.key"
+        hover-class="ios-btn-hover" @click="handleAction(action.key)">{{ busyAction === action.key ? busyLabel(action.key) : action.label }}</button>
     </view>
-    <!-- 底部操作栏占位：高度随操作栏实际高度变化，避免最后一块内容被遮住 -->
     <view v-if="actions.length || canPrint" class="action-spacer"></view>
     <view v-else class="ios-safe-bottom"></view>
   </view>
 
   <view v-else class="ios-page">
-    <view class="ios-loading">{{ loading ? '加载中…' : '采购单不存在' }}</view>
+    <view class="ios-loading">{{ loading ? '加载中…' : (loadFailed ? '采购单加载失败' : '采购单不存在') }}</view>
+    <button v-if="loadFailed && !loading" class="refresh-btn" @click="load">重新加载</button>
   </view>
 </template>
 
@@ -72,7 +76,15 @@
       return {
         orderId: null,
         order: null,
-        loading: true
+        loading: true,
+        loaded: false,
+        disposed: false,
+        loadVersion: 0,
+        loadFailed: false,
+        refreshFailed: false,
+        confirming: false,
+        busyAction: '',
+        operationMessage: ''
       }
     },
     computed: {
@@ -83,16 +95,16 @@
         if (!this.order) return []
         const status = this.order.status
         if (status === '0' || status === '3') {
-          return [{ key: 'submit', label: '提交审批', class: 'ios-btn-primary', handler: this.handleSubmit }]
+          return [{ key: 'submit', label: '提交审批', class: 'ios-btn-primary' }]
         }
         if (status === '1') {
           return [
-            { key: 'reject', label: '驳回', class: 'ios-btn-danger', handler: this.handleReject },
-            { key: 'approve', label: '通过', class: 'ios-btn-primary', handler: this.handleApprove }
+            { key: 'reject', label: '驳回', class: 'ios-btn-danger' },
+            { key: 'approve', label: '通过', class: 'ios-btn-primary' }
           ]
         }
         if (status === '2') {
-          return [{ key: 'receive', label: '确认收货', class: 'ios-btn-primary', handler: this.handleReceive }]
+          return [{ key: 'receive', label: '确认收货', class: 'ios-btn-primary' }]
         }
         return []
       }
@@ -101,16 +113,40 @@
       this.orderId = options.orderId
       this.load()
     },
+    onShow() {
+      if (this.loaded && !this.busyAction && !this.confirming) this.load()
+    },
+    onUnload() {
+      this.disposed = true
+      this.loadVersion += 1
+    },
     methods: {
-      load() {
+      async load() {
+        if (this.disposed) return false
+        const version = ++this.loadVersion
         this.loading = true
-        purchaseDetail(this.orderId).then(res => {
-          this.order = res.data
-        }).catch(() => {
-          this.order = null
-        }).finally(() => {
-          this.loading = false
-        })
+        try {
+          const res = await purchaseDetail(this.orderId)
+          if (version !== this.loadVersion) return false
+          if (!res.data || res.data.orderId == null || res.data.status == null) {
+            throw new Error('采购单详情返回不完整')
+          }
+          this.order = { ...res.data, status: String(res.data.status) }
+          this.loadFailed = false
+          this.refreshFailed = false
+          return true
+        } catch (error) {
+          if (version === this.loadVersion) {
+            this.loadFailed = true
+            this.refreshFailed = !!this.order
+          }
+          return false
+        } finally {
+          if (version === this.loadVersion) {
+            this.loading = false
+            this.loaded = true
+          }
+        }
       },
       money(value) {
         return Number(value || 0).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -130,66 +166,96 @@
           '3': 'ios-badge-red', '4': 'ios-badge-green', '5': 'ios-badge-gray'
         }[status] || 'ios-badge-gray'
       },
+      busyLabel(key) {
+        return { submit: '提交中…', approve: '审批中…', reject: '驳回中…', receive: '收货中…' }[key] || '处理中…'
+      },
+      canExecute(key) {
+        return !this.disposed && !this.busyAction && !this.confirming && !this.loading && !this.refreshFailed &&
+          this.actions.some(action => action.key === key)
+      },
+      handleAction(key) {
+        if (!this.canExecute(key)) return
+        if (key === 'submit') return this.handleSubmit()
+        if (key === 'approve') return this.handleApprove()
+        if (key === 'reject') return this.handleReject()
+        if (key === 'receive') return this.handleReceive()
+      },
+      async performAction(key, operation, nextStatus, successMessage) {
+        if (this.disposed || this.busyAction) return false
+        this.busyAction = key
+        this.operationMessage = ''
+        try {
+          await operation()
+          if (this.disposed) return false
+          // 写接口确认成功后再更新界面，并丢弃提交前尚未返回的旧详情。
+          this.loadVersion += 1
+          this.order = { ...this.order, status: nextStatus }
+          this.operationMessage = successMessage
+          await this.load()
+          if (this.disposed) return false
+          this.$modal.msgSuccess(successMessage)
+          return true
+        } catch (error) {
+          // 超时不代表未落库，重新读取真实状态；请求层负责显示失败原因。
+          await this.load()
+          return false
+        } finally {
+          this.busyAction = ''
+        }
+      },
+      confirmOperation(title, content) {
+        this.confirming = true
+        return new Promise(resolve => {
+          uni.showModal({
+            title,
+            content,
+            success: res => resolve(!!res.confirm),
+            fail: () => resolve(false)
+          })
+        }).finally(() => { this.confirming = false })
+      },
       askOpinion(title, placeholder) {
+        this.confirming = true
         return new Promise(resolve => {
           uni.showModal({
             title,
             editable: true,
             placeholderText: placeholder,
-            success: res => resolve(res.confirm ? (res.content || '') : null),
+            success: res => resolve(res.confirm ? (res.content || '').trim() : null),
             fail: () => resolve(null)
           })
-        })
+        }).finally(() => { this.confirming = false })
       },
-      handleSubmit() {
-        uni.showModal({
-          title: '提交审批',
-          content: '提交后采购单进入待审批状态，确认提交？',
-          success: res => {
-            if (!res.confirm) return
-            purchaseSubmit(this.orderId).then(() => {
-              this.$modal.msgSuccess('已提交审批')
-              this.load()
-            }).catch(() => {})
-          }
-        })
+      async handleSubmit() {
+        if (!this.canExecute('submit')) return
+        const confirmed = await this.confirmOperation('提交审批', '提交后采购单进入待审批状态，确认提交？')
+        if (!confirmed) return
+        return this.performAction('submit', () => purchaseSubmit(this.orderId), '1', '已提交审批')
       },
-      handleApprove() {
-        this.askOpinion('审批通过', '可填写审批意见').then(opinion => {
-          if (opinion === null) return
-          purchaseApprove(this.orderId, opinion).then(() => {
-            this.$modal.msgSuccess('审批通过')
-            this.load()
-          }).catch(() => {})
-        })
+      async handleApprove() {
+        if (!this.canExecute('approve')) return
+        const opinion = await this.askOpinion('审批通过', '可填写审批意见')
+        if (opinion === null) return
+        return this.performAction('approve', () => purchaseApprove(this.orderId, opinion), '2', '审批通过')
       },
-      handleReject() {
-        this.askOpinion('驳回原因', '驳回必须填写原因').then(opinion => {
-          if (opinion === null) return
-          if (!opinion) {
-            this.$modal.msgError('驳回必须填写原因')
-            return
-          }
-          purchaseReject(this.orderId, opinion).then(() => {
-            this.$modal.msgSuccess('已驳回')
-            this.load()
-          }).catch(() => {})
-        })
+      async handleReject() {
+        if (!this.canExecute('reject')) return
+        const opinion = await this.askOpinion('驳回原因', '驳回必须填写原因')
+        if (opinion === null) return
+        if (!opinion) {
+          this.$modal.msgError('驳回必须填写原因')
+          return
+        }
+        return this.performAction('reject', () => purchaseReject(this.orderId, opinion), '3', '已驳回')
       },
-      handleReceive() {
-        uni.showModal({
-          title: '确认收货',
-          content: '将按待收数量全部入库，并生成应付账款，确认收货？',
-          success: res => {
-            if (!res.confirm) return
-            purchaseReceive(this.orderId, {}).then(() => {
-              this.$modal.msgSuccess('收货完成')
-              this.load()
-            }).catch(() => {})
-          }
-        })
+      async handleReceive() {
+        if (!this.canExecute('receive')) return
+        const confirmed = await this.confirmOperation('确认收货', '将按待收数量全部入库，并生成应付账款，确认收货？')
+        if (!confirmed) return
+        return this.performAction('receive', () => purchaseReceive(this.orderId, {}), '4', '收货完成')
       },
       printPdf() {
+        if (this.busyAction || this.confirming || this.loading) return
         const url = buildExportUrl('pdf', this.orderId)
         uni.showLoading({ title: '生成中…' })
         uni.downloadFile({
@@ -242,6 +308,38 @@
     color: rgba(60, 60, 67, 0.6);
   }
 
+  .operation-result {
+    display: flex;
+    align-items: center;
+    gap: 12rpx;
+    margin-top: 20rpx;
+    font-size: 28rpx;
+    color: #007aff;
+  }
+
+  .refresh-state {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12rpx;
+    font-size: 28rpx;
+    color: #000;
+  }
+
+  .refresh-btn {
+    margin: 0;
+    padding: 0 24rpx;
+    min-height: 88rpx;
+    line-height: 88rpx;
+    font-size: 28rpx;
+    color: #007aff;
+    background-color: transparent;
+  }
+
+  .refresh-btn::after, .action-btn::after {
+    border: none;
+  }
+
   .action-bar {
     position: fixed;
     left: 0;
@@ -254,13 +352,18 @@
     border-top: 1rpx solid rgba(60, 60, 67, 0.29);
   }
 
-  /* 与操作栏等高：96rpx 按钮 + 上下 16rpx 内边距 + 安全区 */
   .action-spacer {
     height: calc(152rpx + env(safe-area-inset-bottom));
   }
 
   .action-btn {
     flex: 1;
+    min-width: 0;
     margin: 0 8rpx;
+    padding: 0;
+  }
+
+  .action-btn[disabled] {
+    opacity: 0.55;
   }
 </style>
