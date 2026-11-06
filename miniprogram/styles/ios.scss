@@ -1,0 +1,387 @@
+/**
+ * 物小助 · iOS 设计系统
+ *
+ * 依据 Apple Human Interface Guidelines（github.com/drugnotes/apple-hig-ios-skill）：
+ * - 语义色：systemGroupedBackground / label / separator / tint
+ * - 字号：Large Title 34pt、Headline 17pt、Body 17pt、Footnote 13pt
+ * - 触控目标 ≥ 44pt（88rpx），圆角分组卡片，细分割线
+ * 1pt ≈ 2rpx，统一用 rpx 适配小程序。
+ */
+
+/* ---------------- Design Tokens ---------------- */
+$ios-tint: #007aff;
+$ios-bg: #f2f2f7;
+$ios-card: #ffffff;
+$ios-label: #000000;
+$ios-label-2: rgba(60, 60, 67, 0.6);
+$ios-label-3: rgba(60, 60, 67, 0.3);
+$ios-separator: rgba(60, 60, 67, 0.29);
+$ios-fill: rgba(120, 120, 128, 0.12);
+$ios-fill-2: rgba(120, 120, 128, 0.08);
+
+$ios-green: #34c759;
+$ios-orange: #ff9500;
+$ios-red: #ff3b30;
+$ios-purple: #af52de;
+$ios-teal: #30b0c7;
+$ios-indigo: #5856d6;
+$ios-pink: #ff2d55;
+$ios-yellow: #ffcc00;
+$ios-gray: #8e8e93;
+
+$ios-radius-card: 20rpx;
+$ios-radius-tile: 16rpx;
+$ios-radius-btn: 24rpx;
+$ios-shadow-card: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+
+/* ---------------- 页面骨架 ---------------- */
+.ios-page {
+  min-height: 100vh;
+  background-color: $ios-bg;
+  color: $ios-label;
+  font-family: -apple-system, "SF Pro SC", "PingFang SC", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.ios-safe-bottom {
+  height: calc(env(safe-area-inset-bottom) + 24rpx);
+}
+
+.ios-nav-spacer {
+  height: 88rpx;
+}
+
+/* 大标题（34pt） */
+.ios-large-title {
+  padding: 8rpx 32rpx 16rpx;
+  font-size: 68rpx;
+  line-height: 82rpx;
+  font-weight: 700;
+  letter-spacing: -1rpx;
+  color: $ios-label;
+}
+
+.ios-large-title-sub {
+  padding: 0 32rpx 24rpx;
+  font-size: 28rpx;
+  color: $ios-label-2;
+}
+
+/* 分组标题（13pt，大写灰字） */
+.ios-section-title {
+  padding: 32rpx 32rpx 12rpx;
+  font-size: 26rpx;
+  line-height: 32rpx;
+  color: $ios-label-2;
+}
+
+.ios-section-footer {
+  padding: 12rpx 32rpx 0;
+  font-size: 26rpx;
+  line-height: 34rpx;
+  color: $ios-label-2;
+}
+
+/* ---------------- 卡片 / 分组 ---------------- */
+.ios-card {
+  margin: 0 24rpx;
+  background-color: $ios-card;
+  border-radius: $ios-radius-card;
+  box-shadow: $ios-shadow-card;
+  overflow: hidden;
+}
+
+.ios-card-pad {
+  padding: 28rpx 32rpx;
+}
+
+.ios-group {
+  margin: 0 24rpx;
+  background-color: $ios-card;
+  border-radius: $ios-radius-card;
+  overflow: hidden;
+}
+
+/* 列表行（≥44pt 触控高度） */
+.ios-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 96rpx;
+  padding: 20rpx 32rpx;
+  background-color: $ios-card;
+  box-sizing: border-box;
+}
+
+.ios-cell + .ios-cell::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 32rpx;
+  right: 0;
+  height: 1rpx;
+  background-color: $ios-separator;
+  transform: scaleY(0.5);
+}
+
+.ios-cell-hover {
+  background-color: $ios-fill-2;
+}
+
+/* 通用按压态：只改透明度，不改变布局尺寸，避免点击时页面抖动 */
+.tap-hover {
+  opacity: 0.55;
+}
+
+.ios-cell-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.ios-cell-title {
+  font-size: 32rpx;
+  line-height: 42rpx;
+  color: $ios-label;
+}
+
+.ios-cell-sub {
+  margin-top: 4rpx;
+  font-size: 26rpx;
+  line-height: 34rpx;
+  color: $ios-label-2;
+}
+
+.ios-cell-value {
+  max-width: 55%;
+  margin-left: 16rpx;
+  flex-shrink: 0;
+  overflow: hidden;
+  font-size: 32rpx;
+  color: $ios-label-2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ios-chevron {
+  width: 16rpx;
+  height: 16rpx;
+  margin-left: 12rpx;
+  border-top: 3rpx solid $ios-label-3;
+  border-right: 3rpx solid $ios-label-3;
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+/* iOS 设置风格图标底座 */
+.ios-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60rpx;
+  height: 60rpx;
+  margin-right: 24rpx;
+  border-radius: $ios-radius-tile;
+  flex-shrink: 0;
+}
+
+.ios-tile-lg {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 22rpx;
+  margin-right: 0;
+}
+
+/* ---------------- 按钮 ---------------- */
+.ios-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 96rpx;
+  border-radius: $ios-radius-btn;
+  font-size: 34rpx;
+  font-weight: 600;
+  letter-spacing: 1rpx;
+}
+
+.ios-btn-primary {
+  background-color: $ios-tint;
+  color: #fff;
+}
+
+.ios-btn-secondary {
+  background-color: $ios-fill;
+  color: $ios-tint;
+}
+
+.ios-btn-danger {
+  background-color: $ios-fill;
+  color: $ios-red;
+}
+
+.ios-btn-hover {
+  opacity: 0.75;
+}
+
+/* ---------------- 表单 ---------------- */
+.ios-form-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 100rpx;
+  padding: 0 32rpx;
+}
+
+.ios-form-field + .ios-form-field::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 32rpx;
+  right: 0;
+  height: 1rpx;
+  background-color: $ios-separator;
+  transform: scaleY(0.5);
+}
+
+.ios-form-label {
+  width: 190rpx;
+  flex-shrink: 0;
+  font-size: 30rpx;
+  color: $ios-label;
+}
+
+.ios-form-input {
+  flex: 1;
+  height: 100rpx;
+  font-size: 30rpx;
+  text-align: right;
+  color: $ios-label;
+}
+
+.ios-form-textarea {
+  flex: 1;
+  min-height: 160rpx;
+  padding: 28rpx 0;
+  font-size: 30rpx;
+  text-align: right;
+  color: $ios-label;
+}
+
+.ios-form-picker {
+  flex: 1;
+  height: 100rpx;
+  line-height: 100rpx;
+  text-align: right;
+  font-size: 30rpx;
+  color: $ios-label;
+}
+
+.ios-form-placeholder {
+  color: $ios-label-3;
+}
+
+.ios-field {
+  display: flex;
+  align-items: center;
+  min-height: 100rpx;
+  padding: 0 32rpx;
+  background-color: $ios-card;
+}
+
+.ios-field + .ios-field::before {
+  content: '';
+  position: absolute;
+  height: 1rpx;
+  background-color: $ios-separator;
+}
+
+.ios-input {
+  flex: 1;
+  height: 100rpx;
+  font-size: 32rpx;
+  color: $ios-label;
+}
+
+.ios-placeholder {
+  color: $ios-label-3;
+  font-size: 32rpx;
+}
+
+/* ---------------- 状态徽标 ---------------- */
+.ios-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 40rpx;
+  padding: 0 14rpx;
+  border-radius: 20rpx;
+  font-size: 22rpx;
+  line-height: 40rpx;
+  font-weight: 500;
+}
+
+.ios-badge-blue {
+  background-color: rgba(0, 122, 255, 0.12);
+  color: $ios-tint;
+}
+
+.ios-badge-green {
+  background-color: rgba(52, 199, 89, 0.14);
+  color: #248a3d;
+}
+
+.ios-badge-orange {
+  background-color: rgba(255, 149, 0, 0.16);
+  color: #c25e00;
+}
+
+.ios-badge-red {
+  background-color: rgba(255, 59, 48, 0.14);
+  color: #d70015;
+}
+
+.ios-badge-gray {
+  background-color: $ios-fill;
+  color: $ios-label-2;
+}
+
+/* ---------------- 空态 / 加载 ---------------- */
+.ios-empty {
+  padding: 120rpx 40rpx;
+  text-align: center;
+  color: $ios-label-2;
+  font-size: 28rpx;
+}
+
+.ios-loading {
+  padding: 40rpx 0;
+  text-align: center;
+  color: $ios-label-3;
+  font-size: 26rpx;
+}
+
+/* ---------------- 工具类 ---------------- */
+.ios-row {
+  display: flex;
+  align-items: center;
+}
+
+.ios-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ios-flex-1 {
+  flex: 1;
+  min-width: 0;
+}
+
+.ios-ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ios-mt-8 { margin-top: 8rpx; }
+.ios-mt-16 { margin-top: 16rpx; }
+.ios-mt-24 { margin-top: 24rpx; }
+.ios-mt-32 { margin-top: 32rpx; }

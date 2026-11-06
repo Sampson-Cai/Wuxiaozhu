@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.business.mapper.EnterpriseMapper">
+
+    <select id="selectEnterpriseById" resultType="Enterprise">
+        select id as id, name as name, short_name as shortName, logo as logo, contact as contact,
+               phone as phone, pay_term_days as payTermDays, status as status, remark as remark,
+               update_time as updateTime
+        from t_enterprise
+        where id = #{id}
+    </select>
+
+    <select id="selectEnabledIds" resultType="java.lang.Long">
+        select id from t_enterprise where status = '0' order by id
+    </select>
+
+    <update id="updateEnterprise">
+        update t_enterprise
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="shortName != null">short_name = #{shortName},</if>
+            <if test="logo != null">logo = #{logo},</if>
+            <if test="contact != null">contact = #{contact},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="payTermDays != null">pay_term_days = #{payTermDays},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </set>
+        where id = #{id}
+    </update>
+</mapper>

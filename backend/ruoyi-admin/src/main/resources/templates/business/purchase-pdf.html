@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>采购单</title>
+    <style>
+        @page { size: A4; margin: 18mm 16mm; }
+        * { box-sizing: border-box; }
+        body { font-family: 'PdfCJK', 'Deng', sans-serif; font-size: 10pt; color: #1f2329; margin: 0; }
+        .head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #1F4E79; padding-bottom: 8px; }
+        .title { font-size: 20pt; font-weight: bold; color: #1F4E79; letter-spacing: 2px; }
+        .sub { font-size: 9pt; color: #666; }
+        .meta { width: 100%; margin-top: 12px; border-collapse: collapse; }
+        .meta td { padding: 4px 6px; font-size: 9.5pt; }
+        .meta .label { color: #666; width: 70px; }
+        table.items { width: 100%; border-collapse: collapse; margin-top: 14px; }
+        table.items th { background: #1F4E79; color: #fff; font-weight: bold; padding: 7px 6px; font-size: 9pt; border: 1px solid #1F4E79; }
+        table.items td { padding: 6px; border: 1px solid #c8d3e0; font-size: 9pt; }
+        table.items tr:nth-child(even) td { background: #f5f8fb; }
+        .right { text-align: right; }
+        .center { text-align: center; }
+        .total { margin-top: 10px; text-align: right; font-size: 11pt; font-weight: bold; color: #1F4E79; }
+        .approval { margin-top: 18px; border: 1px solid #c8d3e0; padding: 8px 10px; }
+        .approval h4 { margin: 0 0 6px 0; font-size: 10pt; color: #1F4E79; }
+        .approval p { margin: 3px 0; font-size: 9pt; color: #333; }
+        .footer { position: fixed; bottom: -10mm; width: 100%; text-align: center; font-size: 8pt; color: #999; }
+        .tag { display: inline-block; padding: 1px 8px; border: 1px solid #1F4E79; color: #1F4E79; border-radius: 2px; font-size: 8.5pt; }
+    </style>
+</head>
+<body>
+
+<div class="head">
+    <div>
+        <div class="title">采 购 单</div>
+        <div class="sub" th:text="${order.supplierName}">供应商</div>
+    </div>
+    <div class="sub">
+        <div th:text="'单号：' + ${order.orderNo}">单号</div>
+        <div th:text="'版本：V' + ${order.version}">版本</div>
+    </div>
+</div>
+
+<table class="meta">
+    <tr>
+        <td class="label">供应商</td>
+        <td th:text="${order.supplierName}">-</td>
+        <td class="label">单据状态</td>
+        <td>
+            <span class="tag" th:text="${order.status == '0' ? '草稿' : (order.status == '1' ? '待审批' : (order.status == '2' ? '已通过' : (order.status == '3' ? '已驳回' : (order.status == '4' ? '已完成' : '已取消'))))}">状态</span>
+        </td>
+    </tr>
+    <tr>
+        <td class="label">创建人</td>
+        <td th:text="${order.createBy}">-</td>
+        <td class="label">创建时间</td>
+        <td th:text="${#dates.format(order.createTime, 'yyyy-MM-dd HH:mm')}">-</td>
+    </tr>
+    <tr>
+        <td class="label">提交时间</td>
+        <td th:text="${order.submitTime != null ? #dates.format(order.submitTime, 'yyyy-MM-dd HH:mm') : '-'}">-</td>
+        <td class="label">备注</td>
+        <td th:text="${order.remark} ?: '-'">-</td>
+    </tr>
+</table>
+
+<table class="items">
+    <thead>
+    <tr>
+        <th style="width:36px;">序号</th>
+        <th>商品名称</th>
+        <th style="width:80px;">规格</th>
+        <th style="width:50px;">单位</th>
+        <th style="width:70px;">数量</th>
+        <th style="width:80px;">单价</th>
+        <th style="width:90px;">金额</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="item, stat : ${items}">
+        <td class="center" th:text="${stat.count}">1</td>
+        <td th:text="${item.productName}">-</td>
+        <td th:text="${item.spec} ?: '-'">-</td>
+        <td th:text="${item.unit} ?: '-'">-</td>
+        <td class="right" th:text="${item.qty}">0</td>
+        <td class="right" th:text="${item.price}">0.00</td>
+        <td class="right" th:text="${item.amount}">0.00</td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="total" th:text="'合计金额：￥' + ${order.totalAmount}">合计</div>
+
+<div class="approval" th:if="${not #lists.isEmpty(approvals)}">
+    <h4>审批记录</h4>
+    <p th:each="a : ${approvals}"
+       th:text="${(a.result == '1' ? '通过' : '驳回')} + '｜审批人：' + ${a.approverName} + '｜时间：' + ${#dates.format(a.approveTime, 'yyyy-MM-dd HH:mm')} + '｜意见：' + (${a.opinion} ?: '无')">
+        审批记录
+    </p>
+</div>
+
+<div class="footer">本单据由仓小助智能补货采购平台生成</div>
+
+</body>
+</html>

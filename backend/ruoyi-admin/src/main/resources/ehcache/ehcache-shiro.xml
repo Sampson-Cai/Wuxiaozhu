@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.ehcache.org/v3"
+        xmlns:jsr107="http://www.ehcache.org/v3/jsr107">
+
+    <!-- 默认配置 -->
+    <service>
+        <jsr107:defaults enable-management="false" enable-statistics="false">
+            <jsr107:cache name="sys-cache" template="defaultCache"/>
+            <jsr107:cache name="sys-config" template="defaultCache"/>
+            <jsr107:cache name="sys-dict" template="defaultCache"/>
+            <jsr107:cache name="sys-authCache" template="authCache"/>
+            <jsr107:cache name="sys-userCache" template="userCache"/>
+            <jsr107:cache name="loginRecordCache" template="loginRecordTemplate"/>
+            <jsr107:cache name="shiro-activeSessionCache" template="sessionCache"/>
+            <jsr107:cache name="app-token" template="appTokenTemplate"/>
+            <jsr107:cache name="app-captcha" template="appCaptchaTemplate"/>
+        </jsr107:defaults>
+    </service>
+
+    <!-- 默认缓存模板：永久有效 -->
+    <cache-template name="defaultCache">
+        <heap unit="entries">1000</heap>
+    </cache-template>
+
+    <!-- 用户授权缓存模板：无过期 -->
+    <cache-template name="authCache">
+        <heap unit="entries">10000</heap>
+    </cache-template>
+
+    <!-- 系统活跃用户缓存模板 -->
+    <cache-template name="userCache">
+        <heap unit="entries">10000</heap>
+    </cache-template>
+
+    <!-- 登录记录缓存模板：锁定10分钟 -->
+    <cache-template name="loginRecordTemplate">
+        <expiry>
+            <tti unit="minutes">10</tti>
+        </expiry>
+        <heap unit="entries">2000</heap>
+    </cache-template>
+
+    <!-- 系统会话缓存模板 -->
+    <cache-template name="sessionCache">
+        <heap unit="entries">10000</heap>
+    </cache-template>
+
+    <!-- 小程序访问令牌：7 天过期（与 app-token.expire-seconds 对应） -->
+    <cache-template name="appTokenTemplate">
+        <expiry>
+            <tti unit="hours">168</tti>
+        </expiry>
+        <heap unit="entries">5000</heap>
+    </cache-template>
+
+    <!-- 小程序图形验证码：2 分钟过期，一次性使用 -->
+    <cache-template name="appCaptchaTemplate">
+        <expiry>
+            <tti unit="minutes">2</tti>
+        </expiry>
+        <heap unit="entries">2000</heap>
+    </cache-template>
+
+</config>

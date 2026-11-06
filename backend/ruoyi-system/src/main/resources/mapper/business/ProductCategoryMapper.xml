@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.business.mapper.ProductCategoryMapper">
+
+    <sql id="selectCategoryVo">
+        select category_id as categoryId, enterprise_id as enterpriseId, parent_id as parentId,
+               name as name, sort as sort, status as status, del_flag as delFlag,
+               create_time as createTime, update_time as updateTime
+        from t_product_category
+    </sql>
+
+    <select id="selectCategoryList" resultType="ProductCategory">
+        <include refid="selectCategoryVo"/>
+        where enterprise_id = #{enterpriseId} and del_flag = '0'
+        order by parent_id, sort, category_id
+    </select>
+
+    <select id="selectCategoryById" resultType="ProductCategory">
+        <include refid="selectCategoryVo"/>
+        where enterprise_id = #{enterpriseId} and category_id = #{categoryId} and del_flag = '0'
+    </select>
+
+    <select id="countProductsByCategory" resultType="int">
+        select count(1) from t_product
+        where enterprise_id = #{enterpriseId} and category_id = #{categoryId} and del_flag = '0'
+    </select>
+
+    <select id="countChildren" resultType="int">
+        select count(1) from t_product_category
+        where enterprise_id = #{enterpriseId} and parent_id = #{categoryId} and del_flag = '0'
+    </select>
+
+    <insert id="insertCategory" parameterType="ProductCategory" useGeneratedKeys="true" keyProperty="categoryId">
+        insert into t_product_category (enterprise_id, parent_id, name, sort, status, del_flag, create_by, create_time)
+        values (#{enterpriseId}, #{parentId}, #{name}, #{sort}, #{status}, '0', #{createBy}, sysdate())
+    </insert>
+
+    <update id="updateCategory" parameterType="ProductCategory">
+        update t_product_category
+        <set>
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="sort != null">sort = #{sort},</if>
+            <if test="status != null">status = #{status},</if>
+            update_by = #{updateBy}, update_time = sysdate()
+        </set>
+        where enterprise_id = #{enterpriseId} and category_id = #{categoryId}
+    </update>
+
+    <update id="deleteCategoryById">
+        update t_product_category set del_flag = '2', update_by = #{updateBy}, update_time = sysdate()
+        where enterprise_id = #{enterpriseId} and category_id = #{categoryId} and del_flag = '0'
+    </update>
+</mapper>

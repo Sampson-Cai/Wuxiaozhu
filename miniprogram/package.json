@@ -1,0 +1,59 @@
+{
+  "name": "ruoyi-app",
+  "version": "1.2.0",
+  "private": true,
+  "description": "RuoYi-App uni-app 项目（HBuilderX 结构，使用 CLI 编译）",
+  "scripts": {
+    "dev:mp-weixin": "cross-env NODE_OPTIONS=--openssl-legacy-provider UNI_CLI_CONTEXT=. UNI_PLATFORM=mp-weixin UNI_INPUT_DIR=. UNI_OUTPUT_DIR=dist/dev/mp-weixin vue-cli-service uni-build --watch",
+    "build:mp-weixin": "cross-env NODE_OPTIONS=--openssl-legacy-provider UNI_CLI_CONTEXT=. UNI_PLATFORM=mp-weixin UNI_INPUT_DIR=. UNI_OUTPUT_DIR=dist/build/mp-weixin vue-cli-service uni-build"
+  },
+  "dependencies": {
+    "@dcloudio/uni-app": "2.0.2-5030320261023001",
+    "@dcloudio/uni-cli-i18n": "2.0.2-5030320261023001",
+    "@dcloudio/uni-i18n": "2.0.2-5030320261023001",
+    "@dcloudio/uni-mp-weixin": "2.0.2-5030320261023001",
+    "@vue/composition-api": "^1.7.2",
+    "core-js": "^3.8.3",
+    "regenerator-runtime": "^0.12.1",
+    "vue": "2.6.14",
+    "vuex": "^3.6.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.9",
+    "@babel/runtime": "^7.23.9",
+    "@dcloudio/uni-cli-shared": "2.0.2-5030320261023001",
+    "@dcloudio/uni-template-compiler": "2.0.2-5030320261023001",
+    "@dcloudio/vue-cli-plugin-uni": "2.0.2-5030320261023001",
+    "@dcloudio/webpack-uni-mp-loader": "2.0.2-5030320261023001",
+    "@dcloudio/webpack-uni-pages-loader": "2.0.2-5030320261023001",
+    "@vue/cli-plugin-babel": "~4.5.19",
+    "@vue/cli-service": "~4.5.19",
+    "ajv": "^6.15.0",
+    "ajv-keywords": "^3.5.2",
+    "babel-loader": "^8.3.0",
+    "cache-loader": "^4.1.0",
+    "copy-webpack-plugin": "^5.1.2",
+    "cross-env": "^7.0.3",
+    "css-loader": "^3.6.0",
+    "file-loader": "^4.3.0",
+    "html-webpack-plugin": "^3.2.0",
+    "mini-css-extract-plugin": "^0.9.0",
+    "postcss": "7.0.39",
+    "postcss-comment": "^2.0.0",
+    "postcss-loader": "^3.0.0",
+    "prettier": "^2.8.8",
+    "sass": "~1.32.13",
+    "sass-loader": "^10.5.2",
+    "terser-webpack-plugin": "^4.2.3",
+    "thread-loader": "^2.1.3",
+    "url-loader": "^2.3.0",
+    "vue-template-compiler": "2.6.14",
+    "webpack": "4.47.0",
+    "webpack-dev-server": "^3.11.3",
+    "webpack-merge": "^4.2.2"
+  },
+  "browserslist": [
+    "Android >= 4.4",
+    "ios >= 9"
+  ]
+}

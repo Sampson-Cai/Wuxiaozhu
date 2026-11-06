@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.business.mapper.PurchaseOrderMapper">
+
+    <sql id="selectOrderVo">
+        select order_id as orderId, enterprise_id as enterpriseId, order_no as orderNo, supplier_id as supplierId,
+               supplier_name as supplierName, total_amount as totalAmount, status as status, version as version,
+               submit_by as submitBy, submit_time as submitTime, approve_by as approveBy, approve_time as approveTime,
+               receive_by as receiveBy, receive_time as receiveTime, cancel_reason as cancelReason,
+               remark as remark, create_by as createBy, create_time as createTime, update_by as updateBy,
+               update_time as updateTime, del_flag as delFlag
+        from t_purchase_order
+    </sql>
+
+    <select id="selectOrderList" parameterType="PurchaseOrder" resultType="PurchaseOrder">
+        <include refid="selectOrderVo"/>
+        where enterprise_id = #{enterpriseId} and del_flag = '0'
+        <if test="status != null and status != ''">
+            and status = #{status}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            and (order_no like concat('%', #{keyword}, '%')
+            or supplier_name like concat('%', #{keyword}, '%'))
+        </if>
+        <if test="beginTime != null and beginTime != ''">
+            and create_time &gt;= concat(#{beginTime}, ' 00:00:00')
+        </if>
+        <if test="endTime != null and endTime != ''">
+            and create_time &lt;= concat(#{endTime}, ' 23:59:59')
+        </if>
+        order by order_id desc
+    </select>
+
+    <select id="selectOrderById" resultType="PurchaseOrder">
+        <include refid="selectOrderVo"/>
+        where enterprise_id = #{enterpriseId} and order_id = #{orderId} and del_flag = '0'
+    </select>
+
+    <select id="selectItems" resultType="PurchaseOrderItem">
+        select item_id as itemId, enterprise_id as enterpriseId, order_id as orderId, product_id as productId,
+               product_name as productName, spec as spec, unit as unit, qty as qty, received_qty as receivedQty,
+               price as price, amount as amount, remark as remark
+        from t_purchase_order_item
+        where order_id = #{orderId}
+        order by item_id
+    </select>
+
+    <select id="selectItemById" resultType="PurchaseOrderItem">
+        select item_id as itemId, enterprise_id as enterpriseId, order_id as orderId, product_id as productId,
+               product_name as productName, spec as spec, unit as unit, qty as qty, received_qty as receivedQty,
+               price as price, amount as amount, remark as remark
+        from t_purchase_order_item
+        where enterprise_id = #{enterpriseId} and item_id = #{itemId}
+    </select>
+
+    <select id="selectApprovals" resultType="PurchaseApproval">
+        select approval_id as approvalId, enterprise_id as enterpriseId, order_id as orderId,
+               approver_id as approverId, approver_name as approverName, result as result, opinion as opinion,
+               approve_time as approveTime, create_time as createTime
+        from t_purchase_approval
+        where order_id = #{orderId}
+        order by approval_id
+    </select>
+
+    <insert id="insertOrder" parameterType="PurchaseOrder" useGeneratedKeys="true" keyProperty="orderId">
+        insert into t_purchase_order (enterprise_id, order_no, supplier_id, supplier_name, total_amount, status,
+                                      version, remark, del_flag, create_by, create_time)
+        values (#{enterpriseId}, #{orderNo}, #{supplierId}, #{supplierName}, #{totalAmount}, #{status},
+                0, #{remark}, '0', #{createBy}, sysdate())
+    </insert>
+
+    <update id="updateDraft" parameterType="PurchaseOrder">
+        update t_purchase_order
+        <set>
+            <if test="supplierId != null">supplier_id = #{supplierId},</if>
+            <if test="supplierName != null">supplier_name = #{supplierName},</if>
+            <if test="totalAmount != null">total_amount = #{totalAmount},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy}, update_time = sysdate()
+        </set>
+        where enterprise_id = #{enterpriseId} and order_id = #{orderId} and status in ('0', '3')
+    </update>
+
+    <delete id="deleteItems">
+        delete from t_purchase_order_item where order_id = #{orderId}
+    </delete>
+
+    <insert id="insertItem" parameterType="PurchaseOrderItem" useGeneratedKeys="true" keyProperty="itemId">
+        insert into t_purchase_order_item (enterprise_id, order_id, product_id, product_name, spec, unit,
+                                           qty, received_qty, price, amount, remark)
+        values (#{enterpriseId}, #{orderId}, #{productId}, #{productName}, #{spec}, #{unit},
+                #{qty}, 0, #{price}, #{amount}, #{remark})
+    </insert>
+
+    <insert id="insertApproval" parameterType="PurchaseApproval" useGeneratedKeys="true" keyProperty="approvalId">
+        insert into t_purchase_approval (enterprise_id, order_id, approver_id, approver_name, result, opinion,
+                                         approve_time, create_time)
+        values (#{enterpriseId}, #{orderId}, #{approverId}, #{approverName}, #{result}, #{opinion},
+                sysdate(), sysdate())
+    </insert>
+
+    <update id="submitOrder">
+        update t_purchase_order
+        set status = '1', version = version + 1, submit_by = #{submitBy}, submit_time = sysdate(),
+            approve_by = '', approve_time = null, update_by = #{submitBy}, update_time = sysdate()
+        where enterprise_id = #{enterpriseId} and order_id = #{orderId} and status in ('0', '3')
+    </update>
+
+    <update id="approveOrder">
+        update t_purchase_order
+        set status = '2', approve_by = #{approveBy}, approve_time = sysdate(), update_by = #{approveBy},
+            update_time = sysdate()
+        where enterprise_id = #{enterpriseId} and order_id = #{orderId} and status = '1'
+    </update>
+
+    <update id="rejectOrder">
+        update t_purchase_order
+        set status = '3', approve_by = #{approveBy}, approve_time = sysdate(), update_by = #{approveBy},
+            update_time = sysdate()
+        where enterprise_id = #{enterpriseId} and order_id = #{orderId} and status = '1'
+    </update>
+
+    <update id="cancelOrder">
+        update t_purchase_order
+        set status = '5', cancel_reason = #{cancelReason}, update_by = #{updateBy}, update_time = sysdate()
+        where enterprise_id = #{enterpriseId} and order_id = #{orderId} and status in ('1', '2')
+    </update>
+
+    <!-- 草稿作废：条件同时限定 status 与 del_flag，重复删除时第二次命中 0 行，由 Service 给出可读提示 -->
+    <update id="deleteOrderById">
+        update t_purchase_order
+        set del_flag = '2', update_by = #{updateBy}, update_time = sysdate()
+        where enterprise_id = #{enterpriseId} and order_id = #{orderId} and status = '0' and del_flag = '0'
+    </update>
+
+    <update id="completeOrder">
+        update t_purchase_order
+        set status = '4', receive_by = #{receiveBy}, receive_time = sysdate(), update_by = #{receiveBy},
+            update_time = sysdate()
+        where enterprise_id = #{enterpriseId} and order_id = #{orderId} and status = '2'
+    </update>
+
+    <update id="updateItemReceived">
+        update t_purchase_order_item
+        set received_qty = received_qty + #{qty}
+        where enterprise_id = #{enterpriseId} and item_id = #{itemId}
+    </update>
+</mapper>

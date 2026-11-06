@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.business.ai.mapper.AiChatMapper">
+
+    <resultMap id="SessionResult" type="com.ruoyi.business.ai.domain.AiChatSession">
+        <id     property="sessionId"    column="session_id"/>
+        <result property="enterpriseId" column="enterprise_id"/>
+        <result property="userId"       column="user_id"/>
+        <result property="title"        column="title"/>
+        <result property="createTime"   column="create_time"/>
+        <result property="updateTime"   column="update_time"/>
+        <result property="messageCount" column="message_count"/>
+    </resultMap>
+
+    <resultMap id="MessageResult" type="com.ruoyi.business.ai.domain.AiChatMessage">
+        <id     property="messageId"    column="message_id"/>
+        <result property="enterpriseId" column="enterprise_id"/>
+        <result property="sessionId"    column="session_id"/>
+        <result property="role"         column="role"/>
+        <result property="content"      column="content"/>
+        <result property="sources"      column="sources"/>
+        <result property="model"        column="model"/>
+        <result property="tokenUsage"   column="token_usage"/>
+        <result property="costMs"       column="cost_ms"/>
+        <result property="createTime"   column="create_time"/>
+    </resultMap>
+
+    <insert id="insertSession" parameterType="com.ruoyi.business.ai.domain.AiChatSession"
+            useGeneratedKeys="true" keyProperty="sessionId">
+        insert into t_ai_chat_session (enterprise_id, user_id, title, create_time, update_time)
+        values (#{enterpriseId}, #{userId}, #{title}, sysdate(), sysdate())
+    </insert>
+
+    <update id="touchSession">
+        update t_ai_chat_session
+        <set>
+            update_time = sysdate(),
+            <if test="title != null and title != ''">title = #{title},</if>
+        </set>
+        where session_id = #{sessionId}
+    </update>
+
+    <select id="selectSession" resultMap="SessionResult">
+        select session_id, enterprise_id, user_id, title, create_time, update_time
+        from t_ai_chat_session
+        where enterprise_id = #{enterpriseId} and session_id = #{sessionId} and del_flag = '0'
+    </select>
+
+    <select id="selectSessions" resultMap="SessionResult">
+        select s.session_id, s.enterprise_id, s.user_id, s.title, s.create_time, s.update_time,
+               (select count(1) from t_ai_chat_message m where m.session_id = s.session_id) as message_count
+        from t_ai_chat_session s
+        where s.enterprise_id = #{enterpriseId} and s.user_id = #{userId} and s.del_flag = '0'
+        order by s.update_time desc
+        limit #{limit}
+    </select>
+
+    <insert id="insertMessage" parameterType="com.ruoyi.business.ai.domain.AiChatMessage"
+            useGeneratedKeys="true" keyProperty="messageId">
+        insert into t_ai_chat_message (enterprise_id, session_id, role, content, sources, model,
+                                       token_usage, cost_ms, create_time)
+        values (#{enterpriseId}, #{sessionId}, #{role}, #{content}, #{sources}, #{model},
+                #{tokenUsage}, #{costMs}, sysdate())
+    </insert>
+
+    <select id="selectMessages" resultMap="MessageResult">
+        select * from (
+            select message_id, enterprise_id, session_id, role, content, sources, model,
+                   token_usage, cost_ms, create_time
+            from t_ai_chat_message
+            where session_id = #{sessionId}
+            order by message_id desc
+            limit #{limit}
+        ) t order by t.message_id
+    </select>
+</mapper>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.business.mapper.PayableMapper">
+
+    <sql id="selectPayableVo">
+        select p.payable_id as payableId, p.enterprise_id as enterpriseId, p.payable_no as payableNo,
+               p.order_id as orderId, p.supplier_id as supplierId, p.total_amount as totalAmount,
+               p.paid_amount as paidAmount, p.due_date as dueDate, p.status as status, p.remark as remark,
+               p.create_time as createTime, p.update_time as updateTime,
+               s.supplier_name as supplierName, o.order_no as orderNo
+        from t_payable p
+        left join t_supplier s on s.supplier_id = p.supplier_id
+        left join t_purchase_order o on o.order_id = p.order_id
+    </sql>
+
+    <insert id="insertPayable" parameterType="Payable" useGeneratedKeys="true" keyProperty="payableId">
+        insert into t_payable (enterprise_id, payable_no, order_id, supplier_id, total_amount, paid_amount,
+                               due_date, status, remark, create_time)
+        values (#{enterpriseId}, #{payableNo}, #{orderId}, #{supplierId}, #{totalAmount}, 0,
+                #{dueDate}, '0', #{remark}, sysdate())
+    </insert>
+
+    <select id="selectByOrder" resultType="Payable">
+        <include refid="selectPayableVo"/>
+        where p.enterprise_id = #{enterpriseId} and p.order_id = #{orderId}
+    </select>
+
+    <select id="selectPayableById" resultType="Payable">
+        <include refid="selectPayableVo"/>
+        where p.enterprise_id = #{enterpriseId} and p.payable_id = #{payableId}
+    </select>
+
+    <select id="selectPayableList" parameterType="Payable" resultType="Payable">
+        <include refid="selectPayableVo"/>
+        where p.enterprise_id = #{enterpriseId}
+        <if test="querySupplierId != null">
+            and p.supplier_id = #{querySupplierId}
+        </if>
+        <if test="status != null and status != ''">
+            and p.status = #{status}
+        </if>
+        <if test="unpaidOnly != null and unpaidOnly">
+            and p.status != '2'
+        </if>
+        <if test="dueWithinDays != null">
+            and p.status != '2' and p.due_date is not null
+            and p.due_date &lt;= date_add(curdate(), interval #{dueWithinDays} day)
+        </if>
+        <if test="overdueOnly != null and overdueOnly">
+            and p.status != '2' and p.due_date is not null and p.due_date &lt; curdate()
+        </if>
+        order by p.due_date, p.payable_id desc
+    </select>
+
+    <update id="updatePaidAmount">
+        update t_payable
+        set paid_amount = #{paidAmount}, status = #{status}, update_time = sysdate()
+        where enterprise_id = #{enterpriseId} and payable_id = #{payableId}
+    </update>
+</mapper>

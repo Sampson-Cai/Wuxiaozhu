@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.business.mapper.DashboardMapper">
+
+    <select id="countLowStock" resultType="int">
+        select count(1)
+        from t_stock s
+        inner join t_product p on p.product_id = s.product_id and p.del_flag = '0' and p.status = '0'
+        left join t_replenish_param rp on rp.product_id = s.product_id and rp.enterprise_id = s.enterprise_id
+        where s.enterprise_id = #{enterpriseId}
+          and (s.qty &lt;= 0
+               or (rp.safety_stock is not null and s.qty - s.locked_qty &lt;= rp.safety_stock))
+    </select>
+
+    <select id="countPendingApproval" resultType="int">
+        select count(1) from t_purchase_order
+        where enterprise_id = #{enterpriseId} and del_flag = '0' and status = '1'
+    </select>
+
+    <select id="countPayableDue" resultType="int">
+        select count(1) from t_payable
+        where enterprise_id = #{enterpriseId} and status != '2'
+          and due_date is not null
+          and due_date &lt;= date_add(curdate(), interval #{days} day)
+    </select>
+
+    <select id="countPayableOverdue" resultType="int">
+        select count(1) from t_payable
+        where enterprise_id = #{enterpriseId} and status != '2'
+          and due_date is not null and due_date &lt; curdate()
+    </select>
+
+    <select id="sumUnpaidAmount" resultType="java.math.BigDecimal">
+        select ifnull(sum(total_amount - paid_amount), 0) from t_payable
+        where enterprise_id = #{enterpriseId} and status != '2'
+    </select>
+
+    <select id="purchaseTrend" resultType="java.util.Map">
+        select date_format(create_time, '%Y-%m-%d') as date,
+               count(1) as orderCount,
+               ifnull(sum(total_amount), 0) as amount
+        from t_purchase_order
+        where enterprise_id = #{enterpriseId} and del_flag = '0' and status in ('2', '4')
+          and create_time &gt;= date_sub(curdate(), interval #{days} day)
+        group by date_format(create_time, '%Y-%m-%d')
+        order by date
+    </select>
+
+    <select id="stockTrend" resultType="java.util.Map">
+        select date_format(create_time, '%Y-%m-%d') as date,
+               ifnull(sum(case when record_type = '1' then qty else 0 end), 0) as inQty,
+               ifnull(sum(case when record_type = '2' then qty else 0 end), 0) as outQty
+        from t_stock_record
+        where enterprise_id = #{enterpriseId}
+          and create_time &gt;= date_sub(curdate(), interval #{days} day)
+        group by date_format(create_time, '%Y-%m-%d')
+        order by date
+    </select>
+</mapper>

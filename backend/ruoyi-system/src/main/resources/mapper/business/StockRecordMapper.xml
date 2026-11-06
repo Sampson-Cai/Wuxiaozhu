@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.business.mapper.StockRecordMapper">
+
+    <sql id="selectRecordVo">
+        select r.record_id as recordId, r.enterprise_id as enterpriseId, r.product_id as productId,
+               r.record_type as recordType, r.biz_type as bizType, r.qty as qty, r.before_qty as beforeQty,
+               r.after_qty as afterQty, r.source_no as sourceNo, r.batch_no as batchNo,
+               r.operator_id as operatorId, r.operator_name as operatorName, r.remark as remark,
+               r.reverse_flag as reverseFlag, r.reverse_record_id as reverseRecordId,
+               r.create_time as createTime, p.product_name as productName, p.product_code as productCode
+        from t_stock_record r
+        inner join t_product p on p.product_id = r.product_id
+    </sql>
+
+    <select id="selectRecordList" resultType="StockRecord">
+        <include refid="selectRecordVo"/>
+        where r.enterprise_id = #{enterpriseId}
+        <if test="productId != null">
+            and r.product_id = #{productId}
+        </if>
+        <if test="recordType != null and recordType != ''">
+            and r.record_type = #{recordType}
+        </if>
+        <if test="beginTime != null and beginTime != ''">
+            and r.create_time &gt;= concat(#{beginTime}, ' 00:00:00')
+        </if>
+        <if test="endTime != null and endTime != ''">
+            and r.create_time &lt;= concat(#{endTime}, ' 23:59:59')
+        </if>
+        order by r.record_id desc
+    </select>
+
+    <select id="selectRecordById" resultType="StockRecord">
+        <include refid="selectRecordVo"/>
+        where r.enterprise_id = #{enterpriseId} and r.record_id = #{recordId}
+    </select>
+
+    <select id="selectOutboundTotals" resultType="java.util.Map">
+        select product_id as productId, sum(qty) as totalQty
+        from t_stock_record
+        where enterprise_id = #{enterpriseId} and record_type = '2' and reverse_flag = '0'
+          and create_time &gt;= date_sub(curdate(), interval #{days} day)
+        group by product_id
+    </select>
+
+    <insert id="insertRecord" parameterType="StockRecord" useGeneratedKeys="true" keyProperty="recordId">
+        insert into t_stock_record (enterprise_id, product_id, record_type, biz_type, qty, before_qty, after_qty,
+                                    source_no, batch_no, operator_id, operator_name, remark, reverse_flag,
+                                    reverse_record_id, create_time)
+        values (#{enterpriseId}, #{productId}, #{recordType}, #{bizType}, #{qty}, #{beforeQty}, #{afterQty},
+                #{sourceNo}, #{batchNo}, #{operatorId}, #{operatorName}, #{remark},
+                ifnull(#{reverseFlag}, '0'), #{reverseRecordId}, sysdate())
+    </insert>
+
+    <!-- 冲销后回写标记：条件带 reverse_flag = '0'，重复冲销命中 0 行 -->
+    <update id="markReversed">
+        update t_stock_record
+        set reverse_flag = '1', reverse_record_id = #{reverseRecordId}
+        where enterprise_id = #{enterpriseId} and record_id = #{recordId} and reverse_flag = '0'
+    </update>
+</mapper>

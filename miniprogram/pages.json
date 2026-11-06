@@ -1,0 +1,399 @@
+{
+  "pages": [
+    {
+      "path": "pages/login",
+      "style": {
+        "navigationBarTitleText": "登录",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/index",
+      "style": {
+        "navigationBarTitleText": "物小助",
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": true,
+        "backgroundTextStyle": "dark"
+      }
+    },
+    {
+      "path": "pages/work/index",
+      "style": {
+        "navigationBarTitleText": "工作台",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/mine",
+      "style": {
+        "navigationBarTitleText": "我的",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/mine/avatar/index",
+      "style": {
+        "navigationBarTitleText": "修改头像"
+      }
+    },
+    {
+      "path": "pages/mine/info/index",
+      "style": {
+        "navigationBarTitleText": "个人信息"
+      }
+    },
+    {
+      "path": "pages/mine/info/edit",
+      "style": {
+        "navigationBarTitleText": "编辑资料"
+      }
+    },
+    {
+      "path": "pages/mine/pwd/index",
+      "style": {
+        "navigationBarTitleText": "修改密码"
+      }
+    },
+    {
+      "path": "pages/mine/setting/index",
+      "style": {
+        "navigationBarTitleText": "应用设置"
+      }
+    },
+    {
+      "path": "pages/mine/help/index",
+      "style": {
+        "navigationBarTitleText": "常见问题"
+      }
+    },
+    {
+      "path": "pages/mine/about/index",
+      "style": {
+        "navigationBarTitleText": "关于我们"
+      }
+    }
+  ],
+  "subPackages": [
+    {
+      "root": "pages/product",
+      "pages": [
+        {
+          "path": "index",
+          "style": {
+            "navigationBarTitleText": "商品",
+            "enablePullDownRefresh": true,
+            "backgroundTextStyle": "dark"
+          }
+        },
+        {
+          "path": "form",
+          "style": {
+            "navigationBarTitleText": "商品编辑"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/category",
+      "pages": [
+        {
+          "path": "index",
+          "style": {
+            "navigationBarTitleText": "商品分类"
+          }
+        },
+        {
+          "path": "form",
+          "style": {
+            "navigationBarTitleText": "分类编辑"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/supplier",
+      "pages": [
+        {
+          "path": "index",
+          "style": {
+            "navigationBarTitleText": "供应商",
+            "enablePullDownRefresh": true,
+            "backgroundTextStyle": "dark"
+          }
+        },
+        {
+          "path": "form",
+          "style": {
+            "navigationBarTitleText": "供应商编辑"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/stock",
+      "pages": [
+        {
+          "path": "index",
+          "style": {
+            "navigationBarTitleText": "库存",
+            "enablePullDownRefresh": true,
+            "backgroundTextStyle": "dark"
+          }
+        },
+        {
+          "path": "change",
+          "style": {
+            "navigationBarTitleText": "出入库"
+          }
+        },
+        {
+          "path": "records",
+          "style": {
+            "navigationBarTitleText": "库存流水",
+            "enablePullDownRefresh": true,
+            "backgroundTextStyle": "dark"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/purchase",
+      "pages": [
+        {
+          "path": "index",
+          "style": {
+            "navigationBarTitleText": "采购单",
+            "enablePullDownRefresh": true,
+            "backgroundTextStyle": "dark"
+          }
+        },
+        {
+          "path": "detail",
+          "style": {
+            "navigationBarTitleText": "采购单详情"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/receipt",
+      "pages": [
+        {
+          "path": "index",
+          "style": {
+            "navigationBarTitleText": "收货记录",
+            "enablePullDownRefresh": true,
+            "backgroundTextStyle": "dark"
+          }
+        },
+        {
+          "path": "detail",
+          "style": {
+            "navigationBarTitleText": "收货单详情"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/payable",
+      "pages": [
+        {
+          "path": "index",
+          "style": {
+            "navigationBarTitleText": "应付账款",
+            "enablePullDownRefresh": true,
+            "backgroundTextStyle": "dark"
+          }
+        },
+        {
+          "path": "detail",
+          "style": {
+            "navigationBarTitleText": "应付详情"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/replenish",
+      "pages": [
+        {
+          "path": "index",
+          "style": {
+            "navigationBarTitleText": "补货建议",
+            "enablePullDownRefresh": true,
+            "backgroundTextStyle": "dark"
+          }
+        },
+        {
+          "path": "param",
+          "style": {
+            "navigationBarTitleText": "补货参数"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/search",
+      "pages": [
+        {
+          "path": "index",
+          "style": {
+            "navigationBarTitleText": "智能检索"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/kb",
+      "pages": [
+        {
+          "path": "index",
+          "style": {
+            "navigationBarTitleText": "知识库",
+            "enablePullDownRefresh": true,
+            "backgroundTextStyle": "dark"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/log",
+      "pages": [
+        {
+          "path": "index",
+          "style": {
+            "navigationBarTitleText": "操作日志",
+            "enablePullDownRefresh": true,
+            "backgroundTextStyle": "dark"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/user",
+      "pages": [
+        {
+          "path": "index",
+          "style": {
+            "navigationBarTitleText": "账号管理",
+            "enablePullDownRefresh": true,
+            "backgroundTextStyle": "dark"
+          }
+        },
+        {
+          "path": "form",
+          "style": {
+            "navigationBarTitleText": "账号编辑"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/role",
+      "pages": [
+        {
+          "path": "index",
+          "style": {
+            "navigationBarTitleText": "角色权限"
+          }
+        },
+        {
+          "path": "form",
+          "style": {
+            "navigationBarTitleText": "角色编辑"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/enterprise",
+      "pages": [
+        {
+          "path": "index",
+          "style": {
+            "navigationBarTitleText": "单位信息"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/export",
+      "pages": [
+        {
+          "path": "index",
+          "style": {
+            "navigationBarTitleText": "导出中心"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages/common",
+      "pages": [
+        {
+          "path": "webview/index",
+          "style": {
+            "navigationBarTitleText": "浏览网页"
+          }
+        },
+        {
+          "path": "textview/index",
+          "style": {
+            "navigationBarTitleText": "浏览文本"
+          }
+        }
+      ]
+    }
+  ],
+  "preloadRule": {
+    "pages/index": {
+      "network": "all",
+      "packages": [
+        "pages/product",
+        "pages/purchase",
+        "pages/stock"
+      ]
+    },
+    "pages/work/index": {
+      "network": "all",
+      "packages": [
+        "pages/kb",
+        "pages/payable"
+      ]
+    }
+  },
+  "tabBar": {
+    "color": "#8E8E93",
+    "selectedColor": "#007AFF",
+    "borderStyle": "white",
+    "backgroundColor": "#FFFFFF",
+    "list": [
+      {
+        "pagePath": "pages/index",
+        "iconPath": "static/images/tabbar/home.png",
+        "selectedIconPath": "static/images/tabbar/home_.png",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/work/index",
+        "iconPath": "static/images/tabbar/work.png",
+        "selectedIconPath": "static/images/tabbar/work_.png",
+        "text": "工作台"
+      },
+      {
+        "pagePath": "pages/mine",
+        "iconPath": "static/images/tabbar/mine.png",
+        "selectedIconPath": "static/images/tabbar/mine_.png",
+        "text": "我的"
+      }
+    ]
+  },
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "物小助",
+    "navigationBarBackgroundColor": "#F2F2F7",
+    "backgroundColor": "#F2F2F7",
+    "backgroundColorTop": "#F2F2F7",
+    "backgroundColorBottom": "#F2F2F7"
+  }
+}

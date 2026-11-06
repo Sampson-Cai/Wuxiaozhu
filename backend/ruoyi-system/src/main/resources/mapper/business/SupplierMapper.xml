@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.business.mapper.SupplierMapper">
+
+    <sql id="selectSupplierVo">
+        select supplier_id as supplierId, enterprise_id as enterpriseId, supplier_code as supplierCode,
+               supplier_name as supplierName, contact as contact, phone as phone, email as email,
+               address as address, pay_term_days as payTermDays, lead_days as leadDays, status as status,
+               del_flag as delFlag, remark as remark, create_time as createTime, update_time as updateTime
+        from t_supplier
+    </sql>
+
+    <select id="selectSupplierList" parameterType="Supplier" resultType="Supplier">
+        <include refid="selectSupplierVo"/>
+        where enterprise_id = #{enterpriseId} and del_flag = '0'
+        <if test="supplierName != null and supplierName != ''">
+            and (supplier_name like concat('%', #{supplierName}, '%')
+            or supplier_code like concat('%', #{supplierName}, '%'))
+        </if>
+        <if test="status != null and status != ''">
+            and status = #{status}
+        </if>
+        order by supplier_id desc
+    </select>
+
+    <select id="selectSupplierById" resultType="Supplier">
+        <include refid="selectSupplierVo"/>
+        where enterprise_id = #{enterpriseId} and supplier_id = #{supplierId} and del_flag = '0'
+    </select>
+
+    <select id="countByCode" resultType="int">
+        select count(1) from t_supplier
+        where enterprise_id = #{enterpriseId} and supplier_code = #{supplierCode} and del_flag = '0'
+        <if test="excludeId != null">
+            and supplier_id != #{excludeId}
+        </if>
+    </select>
+
+    <insert id="insertSupplier" parameterType="Supplier" useGeneratedKeys="true" keyProperty="supplierId">
+        insert into t_supplier (enterprise_id, supplier_code, supplier_name, contact, phone, email, address,
+                                pay_term_days, lead_days, status, remark, del_flag, create_by, create_time)
+        values (#{enterpriseId}, #{supplierCode}, #{supplierName}, #{contact}, #{phone}, #{email}, #{address},
+                #{payTermDays}, #{leadDays}, #{status}, #{remark}, '0', #{createBy}, sysdate())
+    </insert>
+
+    <update id="updateSupplier" parameterType="Supplier">
+        update t_supplier
+        <set>
+            <if test="supplierCode != null">supplier_code = #{supplierCode},</if>
+            <if test="supplierName != null">supplier_name = #{supplierName},</if>
+            <if test="contact != null">contact = #{contact},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="payTermDays != null">pay_term_days = #{payTermDays},</if>
+            <if test="leadDays != null">lead_days = #{leadDays},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy}, update_time = sysdate()
+        </set>
+        where enterprise_id = #{enterpriseId} and supplier_id = #{supplierId}
+    </update>
+
+    <update id="updateSupplierStatus" parameterType="Supplier">
+        update t_supplier set status = #{status}, update_by = #{updateBy}, update_time = sysdate()
+        where enterprise_id = #{enterpriseId} and supplier_id = #{supplierId}
+    </update>
+
+    <update id="deleteSupplierById">
+        update t_supplier set del_flag = '2', update_by = #{updateBy}, update_time = sysdate()
+        where enterprise_id = #{enterpriseId} and supplier_id = #{supplierId} and del_flag = '0'
+    </update>
+
+    <!-- 引用计数一律排除已逻辑删除的记录；t_payable 无 del_flag，按状态判断未结清 -->
+    <select id="countOrdersBySupplier" resultType="int">
+        select count(1) from t_purchase_order
+        where enterprise_id = #{enterpriseId} and supplier_id = #{supplierId} and del_flag = '0'
+    </select>
+
+    <select id="countUnpaidPayablesBySupplier" resultType="int">
+        select count(1) from t_payable
+        where enterprise_id = #{enterpriseId} and supplier_id = #{supplierId} and status != '2'
+    </select>
+
+    <select id="countProductsBySupplier" resultType="int">
+        select count(1) from t_product
+        where enterprise_id = #{enterpriseId} and supplier_id = #{supplierId} and del_flag = '0'
+    </select>
+</mapper>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.business.mapper.PaymentRecordMapper">
+
+    <insert id="insertPayment" parameterType="PaymentRecord" useGeneratedKeys="true" keyProperty="paymentId">
+        insert into t_payment_record (enterprise_id, payable_id, amount, pay_method, pay_time, voucher_url,
+                                      operator_id, operator_name, remark, create_time)
+        values (#{enterpriseId}, #{payableId}, #{amount}, #{payMethod}, sysdate(), #{voucherUrl},
+                #{operatorId}, #{operatorName}, #{remark}, sysdate())
+    </insert>
+
+    <select id="selectByPayable" resultType="PaymentRecord">
+        select payment_id as paymentId, payable_id as payableId, amount as amount, pay_method as payMethod,
+               pay_time as payTime, voucher_url as voucherUrl, operator_name as operatorName,
+               remark as remark, create_time as createTime
+        from t_payment_record
+        where enterprise_id = #{enterpriseId} and payable_id = #{payableId}
+        order by payment_id desc
+    </select>
+</mapper>

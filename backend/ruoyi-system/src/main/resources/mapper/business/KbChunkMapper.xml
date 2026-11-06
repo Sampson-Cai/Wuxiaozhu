@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.business.ai.mapper.KbChunkMapper">
+
+    <resultMap id="KbChunkResult" type="com.ruoyi.business.ai.domain.KbChunk">
+        <id     property="chunkId"     column="chunk_id"/>
+        <result property="enterpriseId" column="enterprise_id"/>
+        <result property="documentId"  column="document_id"/>
+        <result property="chunkIndex"  column="chunk_index"/>
+        <result property="pageNo"      column="page_no"/>
+        <result property="content"     column="content"/>
+        <result property="tokenCount"  column="token_count"/>
+        <result property="vectorRef"   column="vector_ref"/>
+        <result property="embedding"   column="embedding"/>
+        <result property="embeddingModel" column="embedding_model"/>
+        <result property="dim"         column="dim"/>
+        <result property="createTime"  column="create_time"/>
+        <result property="docTitle"    column="doc_title"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.ruoyi.business.ai.domain.KbChunk" useGeneratedKeys="true" keyProperty="chunkId">
+        insert into t_kb_chunk (enterprise_id, document_id, chunk_index, content, token_count,
+                                vector_ref, embedding, embedding_model, dim, create_time)
+        values (#{enterpriseId}, #{documentId}, #{chunkIndex}, #{content}, #{tokenCount},
+                #{vectorRef}, #{embedding}, #{embeddingModel}, #{dim}, sysdate())
+    </insert>
+
+    <delete id="deleteByDocument">
+        delete from t_kb_chunk where document_id = #{documentId}
+    </delete>
+
+    <select id="selectByEnterprise" resultMap="KbChunkResult">
+        select c.chunk_id, c.enterprise_id, c.document_id, c.chunk_index, c.page_no, c.content,
+               c.token_count, c.vector_ref, c.embedding, c.embedding_model, c.dim, c.create_time,
+               d.title as doc_title
+        from t_kb_chunk c
+        join t_kb_document d on d.document_id = c.document_id and d.del_flag = '0'
+        where c.enterprise_id = #{enterpriseId}
+    </select>
+
+    <select id="selectByDocument" resultMap="KbChunkResult">
+        select chunk_id, enterprise_id, document_id, chunk_index, page_no, content,
+               token_count, vector_ref, embedding_model, dim, create_time
+        from t_kb_chunk
+        where document_id = #{documentId}
+        order by chunk_index
+    </select>
+
+    <select id="countByEnterprise" resultType="int">
+        select count(1) from t_kb_chunk where enterprise_id = #{enterpriseId}
+    </select>
+</mapper>

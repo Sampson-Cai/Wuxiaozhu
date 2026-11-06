@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.business.mapper.ReceiptMapper">
+
+    <insert id="insertReceipt" parameterType="Receipt" useGeneratedKeys="true" keyProperty="receiptId">
+        insert into t_receipt (enterprise_id, receipt_no, order_id, receipt_type, total_qty, receiver_id,
+                               receiver_name, receipt_time, remark, create_time)
+        values (#{enterpriseId}, #{receiptNo}, #{orderId}, #{receiptType}, #{totalQty}, #{receiverId},
+                #{receiverName}, sysdate(), #{remark}, sysdate())
+    </insert>
+
+    <insert id="insertReceiptItem" parameterType="ReceiptItem" useGeneratedKeys="true" keyProperty="itemId">
+        insert into t_receipt_item (enterprise_id, receipt_id, order_item_id, product_id, qty, price, amount)
+        values (#{enterpriseId}, #{receiptId}, #{orderItemId}, #{productId}, #{qty}, #{price}, #{amount})
+    </insert>
+
+    <select id="selectByOrder" resultType="Receipt">
+        select r.receipt_id as receiptId, r.enterprise_id as enterpriseId, r.receipt_no as receiptNo,
+               r.order_id as orderId, r.receipt_type as receiptType, r.total_qty as totalQty,
+               r.receiver_id as receiverId, r.receiver_name as receiverName, r.receipt_time as receiptTime,
+               r.remark as remark, r.create_time as createTime, o.order_no as orderNo
+        from t_receipt r
+        left join t_purchase_order o on o.order_id = r.order_id
+        where r.enterprise_id = #{enterpriseId} and r.order_id = #{orderId}
+        order by r.receipt_id desc limit 1
+    </select>
+
+    <select id="selectReceiptList" resultType="Receipt">
+        select r.receipt_id as receiptId, r.enterprise_id as enterpriseId, r.receipt_no as receiptNo,
+               r.order_id as orderId, r.receipt_type as receiptType, r.total_qty as totalQty,
+               r.receiver_id as receiverId, r.receiver_name as receiverName, r.receipt_time as receiptTime,
+               r.remark as remark, r.create_time as createTime, o.order_no as orderNo
+        from t_receipt r
+        left join t_purchase_order o on o.order_id = r.order_id
+        where r.enterprise_id = #{enterpriseId}
+        <if test="orderId != null">
+            and r.order_id = #{orderId}
+        </if>
+        order by r.receipt_id desc
+    </select>
+
+    <select id="selectReceiptById" resultType="Receipt">
+        select r.receipt_id as receiptId, r.enterprise_id as enterpriseId, r.receipt_no as receiptNo,
+               r.order_id as orderId, r.receipt_type as receiptType, r.total_qty as totalQty,
+               r.receiver_id as receiverId, r.receiver_name as receiverName, r.receipt_time as receiptTime,
+               r.remark as remark, r.create_time as createTime, o.order_no as orderNo
+        from t_receipt r
+        left join t_purchase_order o on o.order_id = r.order_id
+        where r.enterprise_id = #{enterpriseId} and r.receipt_id = #{receiptId}
+    </select>
+
+    <select id="selectItems" resultType="ReceiptItem">
+        select ri.item_id as itemId, ri.receipt_id as receiptId, ri.order_item_id as orderItemId,
+               ri.product_id as productId, ri.qty as qty, ri.price as price, ri.amount as amount,
+               p.product_name as productName, p.product_code as productCode
+        from t_receipt_item ri
+        left join t_product p on p.product_id = ri.product_id
+        where ri.receipt_id = #{receiptId}
+        order by ri.item_id
+    </select>
+</mapper>
