@@ -2,7 +2,7 @@
 
 面向中小规模单位的补货、采购、库存与应付管理系统。后端基于 RuoYi 4.8.3（Spring Boot 4.1 / JDK 17）改造为 JSON API，前端为 uni-app 微信小程序，内置基于知识库的 AI 助手（RAG + SSE 流式）。
 
-> 定稿版本 v1.0.0 · 2026-11-06 · 后端已部署至 `https://demo7.ztcoding.com`
+> 2026-11-06 · 后端 `https://demo7.ztcoding.com`
 
 ## 目录结构
 
