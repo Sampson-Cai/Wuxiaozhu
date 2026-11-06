@@ -172,6 +172,12 @@
           "style": {
             "navigationBarTitleText": "采购单详情"
           }
+        },
+        {
+          "path": "form",
+          "style": {
+            "navigationBarTitleText": "新建采购单"
+          }
         }
       ]
     },

@@ -36,6 +36,12 @@
     <view class="ios-loading" v-if="loading">加载中…</view>
     <view class="ios-loading" v-else-if="finished && list.length > 0">已加载全部 {{ total }} 条</view>
     <view class="ios-safe-bottom"></view>
+
+    <view class="fab-spacer" v-if="canCreate"></view>
+    <view v-if="canCreate" class="fab" hover-class="fab-hover" @click="createOrder">
+      <uni-icons type="plusempty" size="20" color="#fff"></uni-icons>
+      <text class="fab-label">新建</text>
+    </view>
   </view>
 </template>
 
@@ -63,6 +69,14 @@
         loading: false,
         finished: false,
         loaded: false
+      }
+    },
+    computed: {
+      canCreate() {
+        const store = this.$store
+        const user = store && store.state && store.state.user
+        const perms = (user && user.permissions) || []
+        return perms.indexOf('*:*:*') > -1 || perms.indexOf('business:purchase:edit') > -1
       }
     },
     onLoad(options) {
@@ -159,6 +173,9 @@
       },
       openDetail(item) {
         this.$tab.navigateTo(`/pages/purchase/detail?orderId=${item.orderId}`)
+      },
+      createOrder() {
+        this.$tab.navigateTo('/pages/purchase/form')
       }
     }
   }
@@ -222,5 +239,37 @@
     font-size: 30rpx;
     font-weight: 600;
     margin-bottom: 6rpx;
+  }
+
+  /* 悬浮新建按钮：44pt 以上触控区，避开底部安全区 */
+  .fab-spacer {
+    height: calc(160rpx + env(safe-area-inset-bottom));
+  }
+
+  .fab {
+    position: fixed;
+    right: 32rpx;
+    bottom: calc(40rpx + env(safe-area-inset-bottom));
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 176rpx;
+    height: 96rpx;
+    padding: 0 32rpx;
+    border-radius: 48rpx;
+    background-color: #007aff;
+    box-shadow: 0 8rpx 24rpx rgba(0, 122, 255, 0.28);
+  }
+
+  .fab-hover {
+    opacity: 0.75;
+  }
+
+  .fab-label {
+    margin-left: 8rpx;
+    font-size: 30rpx;
+    font-weight: 600;
+    color: #fff;
   }
 </style>

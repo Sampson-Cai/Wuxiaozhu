@@ -29,6 +29,21 @@
       </view>
     </view>
 
+    <view v-if="canEditOrder" class="ios-section-title">草稿操作</view>
+    <view v-if="canEditOrder" class="ios-group">
+      <view class="ios-cell" hover-class="ios-cell-hover" @click="editOrder">
+        <view class="ios-cell-main">
+          <view class="ios-cell-title">编辑采购单</view>
+        </view>
+        <view class="ios-chevron"></view>
+      </view>
+      <view v-if="order.status === '0'" class="ios-cell" hover-class="ios-cell-hover" @click="deleteOrder">
+        <view class="ios-cell-main">
+          <view class="ios-cell-title" style="color: #ff3b30;">删除草稿</view>
+        </view>
+      </view>
+    </view>
+
     <view v-if="order.approvals && order.approvals.length" class="ios-section-title">审批记录</view>
     <view v-if="order.approvals && order.approvals.length" class="ios-group">
       <view v-for="row in order.approvals" :key="row.approvalId" class="ios-cell">
@@ -68,6 +83,7 @@
     purchaseApprove,
     purchaseReject,
     purchaseReceive,
+    purchaseDelete,
     buildExportUrl
   } from '@/api/business'
 
@@ -90,6 +106,13 @@
     computed: {
       canPrint() {
         return this.order && (this.order.status === '2' || this.order.status === '4')
+      },
+      canEditOrder() {
+        if (!this.order || (this.order.status !== '0' && this.order.status !== '3')) return false
+        const store = this.$store
+        const user = store && store.state && store.state.user
+        const perms = (user && user.permissions) || []
+        return perms.indexOf('*:*:*') > -1 || perms.indexOf('business:purchase:edit') > -1
       },
       actions() {
         if (!this.order) return []
@@ -253,6 +276,28 @@
         const confirmed = await this.confirmOperation('确认收货', '将按待收数量全部入库，并生成应付账款，确认收货？')
         if (!confirmed) return
         return this.performAction('receive', () => purchaseReceive(this.orderId, {}), '4', '收货完成')
+      },
+      editOrder() {
+        if (!this.canEditOrder || this.busyAction) return
+        this.$tab.navigateTo(`/pages/purchase/form?orderId=${this.orderId}`)
+      },
+      async deleteOrder() {
+        if (!this.canEditOrder || this.order.status !== '0' || this.busyAction) return
+        const confirmed = await this.confirmOperation('删除草稿', '确认删除该采购单？')
+        if (!confirmed) return
+        this.busyAction = 'delete'
+        try {
+          await purchaseDelete(this.orderId)
+          if (this.disposed) return
+          this.$modal.msgSuccess('已删除')
+          setTimeout(() => {
+            if (!this.disposed) this.$tab.navigateBack()
+          }, 600)
+        } catch (error) {
+          if (!this.disposed) await this.load()
+        } finally {
+          this.busyAction = ''
+        }
       },
       printPdf() {
         if (this.busyAction || this.confirming || this.loading) return
