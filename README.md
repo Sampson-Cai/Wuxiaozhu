@@ -80,6 +80,8 @@ npm run build:mp-weixin
 
 | 组件 | 说明 |
 | --- | --- |
+| 代码位置 | 服务器 `/opt/qixiaozhu/src`，由 `git clone` 自 GitHub 拉取 |
+| 构建方式 | **纯云端**：本地 `git push`，服务器 `mvn package`，无需本地编译 |
 | 进程管理 | systemd 单元 `qixiaozhu.service`，开机自启、异常 5s 重启 |
 | Web 服务 | 宝塔 nginx 1.24，站点配置 `/www/server/panel/vhost/nginx/demo7.ztcoding.com.conf` |
 | 后端监听 | `127.0.0.1:18080`，仅本机，公网只能经 nginx 443 进入 |
@@ -87,11 +89,16 @@ npm run build:mp-weixin
 | 环境变量 | `/opt/qixiaozhu/app.env`（600，含库口令与模型密钥，不入库） |
 
 ```bash
+# 发布：推送后用一条命令完成 拉取 → 编译 → 替换 → 重启 → 健康检查
+ssh -i ~/Documents/Main/Ubuntu.pem ubuntu@152.136.137.81 /opt/qixiaozhu/deploy.sh
+
 sudo systemctl status qixiaozhu      # 查看状态
-sudo systemctl restart qixiaozhu     # 重启后端
+sudo systemctl restart qixiaozhu     # 只重启，不重新编译
 sudo systemctl restart nginx         # 重启 nginx
 tail -f /opt/qixiaozhu/logs/stdout.log
 ```
+
+发布日志在 `/opt/qixiaozhu/logs/deploy.log`；旧包自动备份为 `ruoyi-admin.jar.bak`，回滚只需覆盖回去再重启。
 
 ### 安全基线
 
