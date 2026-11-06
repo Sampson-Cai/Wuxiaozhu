@@ -4,7 +4,8 @@ import constant from '@/utils/constant'
 import { isHttp, isEmpty } from "@/utils/validate"
 import { login, logout, getInfo } from '@/api/login'
 import { getToken, setToken, removeToken } from '@/utils/auth'
-import defAva from '@/static/images/logo.png'
+// 用静态目录的绝对路径，避免 webpack 再打包一份同样的图片（主包体积 +60KB）
+const defAva = '/static/images/logo.png'
 
 const baseUrl = config.baseUrl
 
